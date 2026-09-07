@@ -16,6 +16,15 @@ const { defaultStorageService } = require("./src/storageService");
 const app = express();
 
 app.use(cors());
+
+// Normalize duplicate /api/api prefixes defensively
+app.use((req, res, next) => {
+  if (req.url.startsWith("/api/api/")) {
+    req.url = req.url.replace(/^\/api\/api\//, "/api/");
+  }
+  next();
+});
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 

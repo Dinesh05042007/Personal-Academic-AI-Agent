@@ -1,12 +1,5 @@
 import { supabase } from "./supabase";
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("academic_ai_token") || "token_student_A";
-  return { Authorization: "Bearer " + token };
-}
+import api from "./api";
 
 export async function createConversation(subjectId, title = "New Chat") {
   try {
@@ -31,11 +24,10 @@ export async function createConversation(subjectId, title = "New Chat") {
     // Fallback to Express backend
   }
 
-  const res = await axios.post(
-    API_BASE + "/api/chat/conversations",
-    { subject_id: subjectId, title },
-    { headers: getAuthHeaders() }
-  );
+  const res = await api.post("/api/chat/conversations", {
+    subject_id: subjectId,
+    title,
+  });
   return res.data.conversation;
 }
 
@@ -64,9 +56,9 @@ export async function getMyConversations(subjectId) {
   }
 
   const url = subjectId
-    ? API_BASE + "/api/chat/conversations?subject_id=" + subjectId
-    : API_BASE + "/api/chat/conversations";
-  const res = await axios.get(url, { headers: getAuthHeaders() });
+    ? `/api/chat/conversations?subject_id=${encodeURIComponent(subjectId)}`
+    : "/api/chat/conversations";
+  const res = await api.get(url);
   return res.data.conversations || [];
 }
 
@@ -88,11 +80,12 @@ export async function saveMessage(conversationId, role, content, sources = []) {
     // Fallback to Express backend
   }
 
-  const res = await axios.post(
-    API_BASE + "/api/chat/messages",
-    { conversation_id: conversationId, role, content, sources },
-    { headers: getAuthHeaders() }
-  );
+  const res = await api.post("/api/chat/messages", {
+    conversation_id: conversationId,
+    role,
+    content,
+    sources,
+  });
   return res.data;
 }
 
@@ -109,9 +102,6 @@ export async function getMessages(conversationId) {
     // Fallback to Express backend
   }
 
-  const res = await axios.get(
-    API_BASE + "/api/chat/messages?conversation_id=" + conversationId,
-    { headers: getAuthHeaders() }
-  );
+  const res = await api.get(`/api/chat/messages?conversation_id=${encodeURIComponent(conversationId)}`);
   return res.data.messages || [];
 }
