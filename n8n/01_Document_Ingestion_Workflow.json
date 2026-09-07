@@ -1,0 +1,81 @@
+{
+  "name": "Academic AI - Document Ingestion Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "academic-ingest",
+        "options": {}
+      },
+      "id": "ingest-webhook-trigger",
+      "name": "Document Ingestion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/resources/ingest",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "student_id", "value": "={{ $json.body.student_id }}" },
+            { "name": "course_id", "value": "={{ $json.body.course_id }}" },
+            { "name": "subject_id", "value": "={{ $json.body.subject_id }}" },
+            { "name": "unit", "value": "={{ $json.body.unit }}" },
+            { "name": "resource_name", "value": "={{ $json.body.resource_name }}" },
+            { "name": "text_content", "value": "={{ $json.body.text_content }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-ingest-request",
+      "name": "Process & Vectorize Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-ingest-webhook",
+      "name": "Return Ingestion Status",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Document Ingestion Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process & Vectorize Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process & Vectorize Document": {
+      "main": [
+        [
+          {
+            "node": "Return Ingestion Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

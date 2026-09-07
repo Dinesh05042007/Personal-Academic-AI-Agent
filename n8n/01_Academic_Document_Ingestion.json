@@ -1,0 +1,256 @@
+{
+  "name": "Academic Document Ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "academic-document-ingestion",
+        "options": {}
+      },
+      "id": "ingest-webhook-trigger",
+      "name": "Document Ingestion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 300],
+      "webhookId": "academic-document-ingestion"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=http://localhost:3000/api/student/resources/{{ $('Document Ingestion Webhook').item.json.body.resource_id }}/status",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"processing_status\": \"processing\"\n}",
+        "options": {}
+      },
+      "id": "set-status-processing-node",
+      "name": "Set Processing Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [380, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Document Ingestion Webhook').item.json.body.file_url || 'http://localhost:3000/api/storage/file?path=' + $('Document Ingestion Webhook').item.json.body.file_path }}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "id": "download-pdf-node",
+      "name": "Download PDF From Storage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [580, 300]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "id": "extract-pdf-node",
+      "name": "Extract From File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [580, 300]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "supabaseTable": "documents",
+        "options": {}
+      },
+      "id": "supabase-vector-store-insert",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              { "name": "student_id", "value": "={{ $('Document Ingestion Webhook').item.json.body.student_id }}" },
+              { "name": "course_id", "value": "={{ $('Document Ingestion Webhook').item.json.body.course_id || 'course_btech_cse' }}" },
+              { "name": "subject_id", "value": "={{ $('Document Ingestion Webhook').item.json.body.subject_id }}" },
+              { "name": "unit", "value": "={{ $('Document Ingestion Webhook').item.json.body.unit || 'Unit 1' }}" },
+              { "name": "resource_id", "value": "={{ $('Document Ingestion Webhook').item.json.body.resource_id }}" },
+              { "name": "resource_name", "value": "={{ $('Document Ingestion Webhook').item.json.body.resource_name || 'Course_Notes.pdf' }}" }
+            ]
+          }
+        }
+      },
+      "id": "default-data-loader",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [720, 520]
+    },
+    {
+      "parameters": {
+        "chunkSize": 1000,
+        "chunkOverlap": 200
+      },
+      "id": "recursive-text-splitter",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [720, 700]
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "id": "gemini-embeddings-node",
+      "name": "Google Gemini Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [940, 520],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gemini-api-credentials",
+          "name": "Google Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=http://localhost:3000/api/student/resources/{{ $('Document Ingestion Webhook').item.json.body.resource_id }}/status",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"processing_status\": \"completed\"\n}",
+        "options": {}
+      },
+      "id": "update-resource-status-node",
+      "name": "Update Status to Completed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1020, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"resource_id\": \"{{ $('Document Ingestion Webhook').item.json.body.resource_id }}\",\n  \"status\": \"completed\"\n}",
+        "options": {}
+      },
+      "id": "respond-ingest-webhook",
+      "name": "Respond to Ingestion Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1220, 300]
+    }
+  ],
+  "connections": {
+    "Document Ingestion Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Processing Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Processing Status": {
+      "main": [
+        [
+          {
+            "node": "Download PDF From Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF From Storage": {
+      "main": [
+        [
+          {
+            "node": "Extract From File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract From File": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Update Status to Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status to Completed": {
+      "main": [
+        [
+          {
+            "node": "Respond to Ingestion Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

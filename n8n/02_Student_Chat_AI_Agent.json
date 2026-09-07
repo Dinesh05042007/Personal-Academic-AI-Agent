@@ -1,0 +1,182 @@
+{
+  "name": "Personal Academic AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "academic-chat",
+        "options": {}
+      },
+      "id": "webhook-chat-trigger",
+      "name": "Academic Chat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "academic-chat"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question || $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a Personal Academic AI Agent for one authenticated student.\n\nThe student's uploaded academic resources are the primary knowledge source.\n\nCurrent mode: {{ $json.body.mode || 'learn' }}\nCurrent subject: {{ $json.body.subject_id || 'All Subjects' }}\nCurrent course: {{ $json.body.course_id || 'Course' }}\n\nRULES:\n1. Search the student's private academic knowledge base when the question relates to their resources.\n2. Respect student and subject boundaries.\n3. Do not claim that something came from a document unless the retrieved document actually supports it.\n4. Do not invent page numbers or citations.\n5. If relevant information cannot be found in the student's resources, clearly say: \"I couldn't find this information in your uploaded course materials.\"\n6. Answer strictly according to the current mode:\n   - LEARN MODE: Teach like a classroom teacher. Explain concepts in simple language starting from the basic idea. Break difficult concepts into steps and give an intuitive everyday analogy.\n   - EXAM MODE: Prepare a structured exam-ready answer suitable for the requested mark level (e.g. 10-mark with definition, headings, ASCII architecture diagram cue, important points, and conclusion; or concise 2-mark answer).\n   - SUMMARY MODE: Summarize the student's uploaded academic material with headings, bullet points, and core definitions.\n   - QUIZ MODE: Create a practice quiz directly from the student's notes with clear questions and grounded answer explanations.\n   - FIND MODE: Help the student locate information in their resources. Report the resource name, page number when available, and section/unit.\n7. Keep explanations logical, accurate, and classroom-friendly."
+        }
+      },
+      "id": "ai-agent-node",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "gemini-chat-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [320, 520],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gemini-api-credentials",
+          "name": "Google Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "simple-memory-node",
+      "name": "Simple Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [480, 520]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "student_academic_knowledge",
+        "toolDescription": "Search the student's private academic knowledge base. Use this tool when the student asks about: lecture notes, PDFs, syllabus, assignments, lab manuals, previous question papers, course topics, and subject-specific information. Only use information belonging to the current student and relevant subject.",
+        "topK": 5,
+        "supabaseTable": "documents",
+        "options": {}
+      },
+      "id": "supabase-vector-store-tool",
+      "name": "Supabase Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [660, 520],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "id": "gemini-embeddings-node",
+      "name": "Google Gemini Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [820, 700],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gemini-api-credentials",
+          "name": "Google Gemini API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"output\": \"{{ $json.output }}\",\n  \"answer\": \"{{ $json.output }}\"\n}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Academic Chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store Tool",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,45 @@
+COURSE: B.Tech Computer Science & Engineering
+SEMESTER: 3
+SUBJECT: Operating Systems (CS301)
+UNIT: Unit 2 - Process Management & CPU Scheduling
+
+---
+PAGE 1: PROCESS CONCEPTS & STATES
+A process is a program in execution. A process includes the program counter, stack, data section, and process control block (PCB).
+Process States:
+1. New: The process is being created.
+2. Ready: The process is waiting to be assigned to a processor.
+3. Running: Instructions are being executed by the CPU.
+4. Waiting (Blocked): The process is waiting for some event to occur (such as an I/O operation or reception of a signal).
+5. Terminated: The process has finished execution.
+
+---
+PAGE 2: CPU SCHEDULING CONCEPTS
+CPU scheduling is the basis of multiprogrammed operating systems. By switching the CPU among processes, the operating system makes the computer more productive.
+In a uniprocessor system, only one process can run at a time; any other processes must wait until the CPU is free and can be rescheduled.
+The objective of multiprogramming is to have some process running at all times, to maximize CPU utilization.
+
+The ready queue holds all processes residing in main memory that are ready and waiting to execute.
+
+---
+PAGE 3: SCHEDULING ALGORITHMS
+1. First-Come, First-Served (FCFS) Scheduling:
+The process that requests the CPU first is allocated the CPU first. Implementation is easily managed with a FIFO queue. Drawback: Average waiting time is often quite long (Convoy Effect).
+
+2. Shortest-Job-First (SJF) Scheduling:
+Associates with each process the length of the process's next CPU burst. When the CPU is available, it is assigned to the process that has the smallest next CPU burst. SJF is optimal because it gives the minimum average waiting time for a given set of processes. Difficulty: Knowing the length of the next CPU request.
+
+3. Round-Robin (RR) Scheduling:
+Designed especially for time-sharing systems. A small unit of time, called a time quantum or time slice (usually 10 to 100 milliseconds), is defined. The ready queue is treated as a circular queue. The CPU scheduler goes around the ready queue, allocating the CPU to each process for a time interval of up to 1 time quantum.
+
+4. Priority Scheduling:
+A priority is associated with each process, and the CPU is allocated to the process with the highest priority. Equal-priority processes are scheduled in FCFS order. Problem: Starvation (indefinite blocking). Solution: Aging (gradually increasing the priority of processes that wait in the system for a long time).
+
+---
+PAGE 4: DEADLOCK CONCEPTS
+A deadlock in an operating system is a situation in which two or more processes are unable to proceed because each is waiting for the other to release a resource.
+Four Necessary Conditions for Deadlock (Coffman Conditions):
+1. Mutual Exclusion: At least one resource must be held in a non-shareable mode.
+2. Hold and Wait: A process must be holding at least one resource and waiting to acquire additional resources that are currently being held by other processes.
+3. No Preemption: Resources cannot be preempted; a resource can be released only voluntarily by the process holding it after that process has completed its task.
+4. Circular Wait: A closed chain of processes exists such that each process holds at least one resource needed by the next process in the chain.

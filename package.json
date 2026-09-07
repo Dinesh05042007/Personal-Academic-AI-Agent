@@ -1,0 +1,33 @@
+{
+  "name": "personal-academic-ai-agent",
+  "version": "1.0.0",
+  "description": "Course-grounded, privacy-first AI academic assistant for university students with verified source citations and multi-tenant student isolation.",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm --prefix frontend run build",
+    "test:stage11": "node backend/tests/test_stage11_auto_ingest.js",
+    "test:stage12": "node backend/tests/test_stage12_academic_modes.js",
+    "test:stage13": "node backend/tests/test_stage13_five_modes.js",
+    "test:stage14": "node backend/tests/test_stage14_security_hardening.js",
+    "test:stage15": "node backend/tests/test_stage15_auto_upload_pipeline.js",
+    "test:stage16": "node backend/tests/test_stage16_frontend_and_polish.js",
+    "test:stage17": "node backend/tests/test_stage17_college_demo_verification.js",
+    "test:all": "node backend/tests/test_all_stages.js",
+    "demo": "node backend/tests/test_stage17_college_demo_verification.js"
+  },
+  "keywords": [
+    "academic-ai",
+    "rag",
+    "course-assistant",
+    "student-isolation",
+    "n8n",
+    "pgvector",
+    "education"
+  ],
+  "author": "Dinesh",
+  "license": "MIT"
+}

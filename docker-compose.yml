@@ -1,0 +1,18 @@
+﻿version: '3.8'
+
+services:
+  academic-ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: academic_ai_app
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - SUPABASE_URL=
+      - SUPABASE_ANON_KEY=
+      - N8N_INGESTION_WEBHOOK_URL=
+      - N8N_CHAT_WEBHOOK_URL=
+    restart: unless-stopped
