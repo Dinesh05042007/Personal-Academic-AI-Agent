@@ -21,14 +21,14 @@ An autonomous, course-grounded AI academic assistant for engineering students (c
                                                 │ HTTPS
                                                 ▼
                                   ┌──────────────────────────┐
-                                  │     🛡️ Express Backend    │
+                                  │     🛡️ Express Backend   │
                                   │    (Auth, RLS, Storage)  │
                                   └──────┬────────────┬──────┘
                                          │            │
                    ┌─────────────────────┘            └─────────────────────┐
                    ▼                                                        ▼
     ┌───────────────────────────────┐                        ┌──────────────────────────────┐
-    │     ⚡ n8n Orchestrator        │                        │     🗄️ Supabase Cloud        │
+    │     ⚡ n8n Orchestrator       │                        │     🗄️ Supabase Cloud        │
     │  - Document Ingestion Pipeline│                        │  - Postgres + pgvector       │
     │  - Conversational Agent       │                        │  - Row Level Security (RLS)  │
     │  - Intent & Unit Routing      │                        │  - Private Storage Buckets   │
@@ -36,7 +36,7 @@ An autonomous, course-grounded AI academic assistant for engineering students (c
                    │                                         └──────────────────────────────┘
                    ▼
     ┌───────────────────────────────┐
-    │     🧠 Gemini Pro / Flash     │
+    │     🧠 Gemini Pro / Flash      │
     │  - Dense Vector Embeddings    │
     │  - Academic Reasoner & Mode   │
     └───────────────────────────────┘
