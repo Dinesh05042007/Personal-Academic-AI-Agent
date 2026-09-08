@@ -431,6 +431,49 @@
       "semester": 4,
       "faculty_id": "faculty_sharma_uuid",
       "created_at": "2026-09-07T12:24:23.818Z"
+    },
+    {
+      "id": "course_1ca41715",
+      "student_id": "student_A_uuid",
+      "name": "Computer Science Alpha",
+      "semester": 1,
+      "created_at": "2026-09-08T10:43:03.523Z"
+    },
+    {
+      "id": "course_44e7c525",
+      "student_id": "student_B_uuid",
+      "name": "Information Tech Beta",
+      "semester": 1,
+      "created_at": "2026-09-08T10:43:03.524Z"
+    },
+    {
+      "id": "course_e4f012ae",
+      "student_id": "student_A_stage15",
+      "name": "B.Tech Computer Science",
+      "semester": 1,
+      "created_at": "2026-09-08T10:43:06.857Z"
+    },
+    {
+      "id": "course_e645c90c",
+      "student_id": "student_test_stage16",
+      "name": "B.Tech CSE",
+      "semester": 1,
+      "created_at": "2026-09-08T10:43:12.599Z"
+    },
+    {
+      "id": "course_9daadda5",
+      "student_id": "dinesh_evaluator_demo",
+      "name": "B.Tech Computer Science and Engineering",
+      "semester": 1,
+      "created_at": "2026-09-08T10:43:14.937Z"
+    },
+    {
+      "id": "course_off_48ae40f5",
+      "code": "CS401",
+      "name": "Cloud Computing & Distributed Systems",
+      "semester": 4,
+      "faculty_id": "faculty_sharma_uuid",
+      "created_at": "2026-09-08T10:43:24.608Z"
     }
   ],
   "subjects": [
@@ -1097,6 +1140,62 @@
       "name": "Database Management Systems",
       "code": "CS302",
       "created_at": "2026-09-07T12:24:16.065Z"
+    },
+    {
+      "id": "subj_1dd6b17b",
+      "course_id": "course_1ca41715",
+      "student_id": "student_A_uuid",
+      "name": "Operating Systems",
+      "code": "CS301",
+      "created_at": "2026-09-08T10:43:03.525Z"
+    },
+    {
+      "id": "subj_8e8a5e6d",
+      "course_id": "course_1ca41715",
+      "student_id": "student_A_uuid",
+      "name": "Database Systems",
+      "code": "CS302",
+      "created_at": "2026-09-08T10:43:03.525Z"
+    },
+    {
+      "id": "subj_1ac404ba",
+      "course_id": "course_44e7c525",
+      "student_id": "student_B_uuid",
+      "name": "Computer Networks",
+      "code": "IT301",
+      "created_at": "2026-09-08T10:43:03.530Z"
+    },
+    {
+      "id": "subj_ec478f05",
+      "course_id": "course_e4f012ae",
+      "student_id": "student_A_stage15",
+      "name": "Operating Systems",
+      "code": "CS301",
+      "created_at": "2026-09-08T10:43:06.862Z"
+    },
+    {
+      "id": "subj_2b0175c4",
+      "course_id": "course_e645c90c",
+      "student_id": "student_test_stage16",
+      "name": "Operating Systems",
+      "code": "CS301",
+      "created_at": "2026-09-08T10:43:12.600Z"
+    },
+    {
+      "id": "subj_0bba3268",
+      "course_id": "course_9daadda5",
+      "student_id": "dinesh_evaluator_demo",
+      "name": "Operating Systems",
+      "code": "CS301",
+      "created_at": "2026-09-08T10:43:14.938Z"
+    },
+    {
+      "id": "subj_518a9413",
+      "course_id": "course_9daadda5",
+      "student_id": "dinesh_evaluator_demo",
+      "name": "Database Management Systems",
+      "code": "CS302",
+      "created_at": "2026-09-08T10:43:14.940Z"
     }
   ],
   "resources": [
@@ -1740,6 +1839,198 @@
       "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\uploads\\1788811360529-991608914-Operating-System.pdf",
       "processing_status": "completed",
       "created_at": "2026-09-07T20:02:56.276Z"
+    },
+    {
+      "id": "7ec6be53-f15b-433e-b19c-9888eefdfb97",
+      "student_id": "79c85772-9e49-408b-a99a-5d7025a14760",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "os",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\uploads\\1788854403586-627319899-Operating-System.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T08:00:19.944Z"
+    },
+    {
+      "id": "ca795acb-da67-48a7-be9f-e8a98ed3a7a8",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:35:30.585Z"
+    },
+    {
+      "id": "f654b8fa-f766-4841-bb50-19ab53d7b10f",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:37:24.864Z"
+    },
+    {
+      "id": "c9aba2e5-6097-4fc1-9742-011039e7e849",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:38:53.960Z"
+    },
+    {
+      "id": "57f08a61-cf33-4a7a-8828-feeb1f288894",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:39:45.899Z"
+    },
+    {
+      "id": "d384644a-5917-45f6-a8ae-d9bb43f6f3be",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:40:06.103Z"
+    },
+    {
+      "id": "9523d0d2-8622-41c9-811f-9c31785c534e",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:41:14.147Z"
+    },
+    {
+      "id": "13cad29c-11a3-4fdd-b18b-a38a1cc950a1",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:41:53.806Z"
+    },
+    {
+      "id": "9a964aea-24a1-4319-865e-243aef7df99f",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "processing",
+      "created_at": "2026-09-08T10:42:05.470Z"
+    },
+    {
+      "id": "fb4ab706-666b-43b0-8b34-5482124151c8",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "processing",
+      "created_at": "2026-09-08T10:42:13.294Z"
+    },
+    {
+      "id": "d5a49fa4-1ba1-47bd-9ea4-644fe911fb04",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "processing",
+      "created_at": "2026-09-08T10:42:34.264Z"
+    },
+    {
+      "id": "4235cfd4-1479-4640-abe2-35f2652004f5",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating Systems Unit 1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:42:48.504Z"
+    },
+    {
+      "id": "79006bfe-f27d-49bd-965f-ac04e1cf9134",
+      "student_id": "student_A_stage15",
+      "course_id": "course_e4f012ae",
+      "subject_id": "subj_ec478f05",
+      "name": "OS_Unit_1_Auto_Ingest.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\uploads\\1788864186931-448235214-Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:43:08.839Z"
+    },
+    {
+      "id": "6912e1db-9fc6-4c94-97ae-fabf1aae4a69",
+      "student_id": "student_A_stage15",
+      "course_id": "course_e4f012ae",
+      "subject_id": "subj_ec478f05",
+      "name": "Corrupt_Notes.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "non_existent_folder/missing_file.pdf",
+      "processing_status": "failed",
+      "created_at": "2026-09-08T10:43:10.905Z",
+      "processing_error": "ENOENT: no such file or directory, open 'D:\\MY AI\\Personal-Academic-AI-Agent\\backend\\non_existent_folder\\missing_file.pdf'"
+    },
+    {
+      "id": "f5c948f7-d687-40d8-a34d-45b548476375",
+      "student_id": "dinesh_evaluator_demo",
+      "course_id": "course_9daadda5",
+      "subject_id": "subj_0bba3268",
+      "name": "Operating_Systems_Unit_1.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:43:16.125Z"
+    },
+    {
+      "id": "5d4fa246-80f1-45ee-8f3e-33733f4fda00",
+      "student_id": "student_A_uuid",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Operating_Systems_Unit_1_College.pdf",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "documents/Operating_Systems_Unit_1.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-08T10:43:30.257Z"
     }
   ]
 }

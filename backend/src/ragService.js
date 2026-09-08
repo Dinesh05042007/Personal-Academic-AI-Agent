@@ -66,7 +66,7 @@ class RAGService {
       course_id = null,
       unit = null,
       topK = 3,
-      similarityThreshold = 0.35,
+      similarityThreshold = 0.20,
       mode = "NORMAL"
     } = options;
 
@@ -104,7 +104,7 @@ class RAGService {
       similarityThreshold
     });
 
-    // 3. Don't Know / Missing Info Check
+    console.log(`[RAG DEBUG] Query: "${searchQuery}" | student_id: "${student_id}" | subject_id: "${subject_id}" | Matches: ${matches ? matches.length : 0}`);
     if (!matches || matches.length === 0) {
       return {
         question,

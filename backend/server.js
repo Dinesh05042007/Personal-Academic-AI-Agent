@@ -325,7 +325,7 @@ app.post("/api/process-resource", requireStudentAuth, async (req, res) => {
     // Direct Processing fallback
     const absPath = path.isAbsolute(file_path)
       ? file_path
-      : path.join(__dirname, "../", file_path);
+      : path.resolve(__dirname, file_path);
 
     const ingestResult = await defaultRAGService.ingestDocument(absPath, {
       student_id,
@@ -550,6 +550,8 @@ app.post("/api/chat", requireStudentAuth, async (req, res) => {
         return res.json({
           output: typeof out === "string" ? out : JSON.stringify(out),
           answer: typeof out === "string" ? out : JSON.stringify(out),
+          sources: response.data?.sources || [],
+          found_in_notes: response.data?.found_in_notes !== undefined ? response.data.found_in_notes : true,
           source_orchestrator: "n8n_webhook"
         });
       } catch (n8nErr) {
@@ -570,7 +572,7 @@ app.post("/api/chat", requireStudentAuth, async (req, res) => {
     res.json({
       output: response.answer,
       answer: response.answer,
-      sources: response.sources,
+      sources: response.sources || [],
       found_in_notes: response.found_in_notes,
       conversation_id: response.conversation_id,
       source_orchestrator: "agent_orchestrator",

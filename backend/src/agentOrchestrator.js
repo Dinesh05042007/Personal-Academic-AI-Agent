@@ -255,7 +255,7 @@ class AgentOrchestrator {
     const upperMode = resolvedMode;
 
     const topK = upperMode === "SUMMARY" ? 6 : (upperMode === "FIND" ? 5 : 3);
-    const similarityThreshold = (upperMode === "SUMMARY" || upperMode === "STUDY_PLAN" || upperMode === "QUIZ") ? 0.25 : 0.32;
+    const similarityThreshold = (upperMode === "SUMMARY" || upperMode === "STUDY_PLAN" || upperMode === "QUIZ") ? 0.20 : 0.20;
 
     // 1. Tool Call: Search Student Knowledge Base
     const retrievalResult = await this.ragService.queryKnowledge(resolvedQuestion, {
