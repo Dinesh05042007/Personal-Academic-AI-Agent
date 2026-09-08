@@ -1,4 +1,4 @@
-﻿# Multi-stage production Dockerfile for Personal Academic AI Agent
+# Multi-stage production Dockerfile for Personal Academic AI Agent
 FROM node:22-alpine AS builder
 
 WORKDIR /app
@@ -28,4 +28,4 @@ COPY --from=builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 3000
 
-CMD [node, backend/server.js]
+CMD ["node", "backend/server.js"]
