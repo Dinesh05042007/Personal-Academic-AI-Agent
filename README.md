@@ -36,7 +36,7 @@ An autonomous, course-grounded AI academic assistant for engineering students (c
                    │                                         └──────────────────────────────┘
                    ▼
     ┌───────────────────────────────┐
-    │     🧠 Gemini Pro / Flash      │
+    │     🧠 Gemini Pro / Flash     │
     │  - Dense Vector Embeddings    │
     │  - Academic Reasoner & Mode   │
     └───────────────────────────────┘
