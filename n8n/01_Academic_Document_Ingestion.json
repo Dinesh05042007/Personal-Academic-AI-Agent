@@ -1,10 +1,12 @@
 {
+  "id": "AcademIngest0001",
   "name": "Academic Document Ingestion",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "academic-document-ingestion",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "ingest-webhook-trigger",
@@ -106,7 +108,7 @@
     },
     {
       "parameters": {
-        "modelName": "models/text-embedding-004"
+        "modelName": "models/gemini-embedding-001"
       },
       "id": "gemini-embeddings-node",
       "name": "Google Gemini Embeddings",

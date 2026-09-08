@@ -4,7 +4,7 @@ const axios = require("axios");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const { defaultRAGService } = require("./src/ragService");
 const { defaultStore } = require("./src/vectorStore");
@@ -540,9 +540,10 @@ app.post("/api/chat", requireStudentAuth, async (req, res) => {
             course_id,
             subject_id,
             conversation_id: conversation_id || ("session_" + student_id),
+            sessionId: conversation_id || ("session_" + student_id),
             mode: mode || "NORMAL"
           },
-          { timeout: 8000 }
+          { timeout: 45000 }
         );
 
         const out = response.data?.output || response.data?.answer || response.data;

@@ -1,10 +1,12 @@
 {
+  "id": "AcademChat000001",
   "name": "Personal Academic AI Agent",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "academic-chat",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "webhook-chat-trigger",
@@ -30,7 +32,7 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.0-flash",
+        "modelName": "models/gemini-3.6-flash",
         "options": {
           "temperature": 0.2
         }
@@ -49,6 +51,8 @@
     },
     {
       "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.session_id || $json.body.student_id || $json.sessionId || 'academic-default' }}",
         "contextWindowLength": 10
       },
       "id": "simple-memory-node",
@@ -80,7 +84,7 @@
     },
     {
       "parameters": {
-        "modelName": "models/text-embedding-004"
+        "modelName": "models/gemini-embedding-001"
       },
       "id": "gemini-embeddings-node",
       "name": "Google Gemini Embeddings",
@@ -96,8 +100,7 @@
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"output\": \"{{ $json.output }}\",\n  \"answer\": \"{{ $json.output }}\"\n}",
+        "respondWith": "firstIncomingItem",
         "options": {}
       },
       "id": "respond-webhook",

@@ -1716,6 +1716,30 @@
       "file_path": "documents/Operating_Systems_Unit_1.pdf",
       "processing_status": "completed",
       "created_at": "2026-09-07T12:24:26.557Z"
+    },
+    {
+      "id": "5d407768-2566-41e6-8c85-db92c7a72e68",
+      "student_id": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjZmZDdjMzhiLTU3OTAtNGZiMy1iMWQwLTg3NmM5ZTQ4ODIyYiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2p0eGF0cmZreHV6ZXlmaGNxbGhkLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3OWM4NTc3Mi05ZTQ5LTQwOGItYTk5YS01ZDcwMjVhMTQ3NjAiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzg4ODE0MTM1LCJpYXQiOjE3ODg4MTA1MzUsImVtYWlsIjoiMjQwMzczNzcyMDUyMTAwNkBrc3JjdC5uZXQiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoiMjQwMzczNzcyMDUyMTAwNkBrc3JjdC5uZXQiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZnVsbF9uYW1lIjoiRGluZXNoIE0iLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6Ijc5Yzg1NzcyLTllNDktNDA4Yi1hOTlhLTVkNzAyNWExNDc2MCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzg4ODEwNTM1fV0sInNlc3Npb25faWQiOiIzYzJiOGI0NC0wZDNhLTQxZWUtODQyZS05ZjdlYmJhNTgyZmEiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.OIYlbcHp6PfSFl4UjJOEH--xA2F4MeN3zHXCO61pzHSh6vQPM0iwx2w6Nlma1E_OlHpgio21rqDDN4E908Ni8Q",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "OS unit 2",
+      "unit": "Unit 2",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\uploads\\1788810750516-279114103-Operating-System.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-07T19:52:48.156Z"
+    },
+    {
+      "id": "c2c3ba7b-bfdd-4dc5-a3c0-33ca2baabd8d",
+      "student_id": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjZmZDdjMzhiLTU3OTAtNGZiMy1iMWQwLTg3NmM5ZTQ4ODIyYiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2p0eGF0cmZreHV6ZXlmaGNxbGhkLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3OWM4NTc3Mi05ZTQ5LTQwOGItYTk5YS01ZDcwMjVhMTQ3NjAiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzg4ODE0Njc0LCJpYXQiOjE3ODg4MTEwNzQsImVtYWlsIjoiMjQwMzczNzcyMDUyMTAwNkBrc3JjdC5uZXQiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoiMjQwMzczNzcyMDUyMTAwNkBrc3JjdC5uZXQiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZnVsbF9uYW1lIjoiRGluZXNoIE0iLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInN1YiI6Ijc5Yzg1NzcyLTllNDktNDA4Yi1hOTlhLTVkNzAyNWExNDc2MCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzg4ODExMDc0fV0sInNlc3Npb25faWQiOiJlYWFlYTkzNC1jYTQ2LTRjOTEtYmE0Yy05ZDg4N2I0NjE2ODciLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.82QF4zFoKl2IIGFCRR4AAMGWO52RUK0NmvDc_kRRLmfsJ6UzUWWyOrrvA7iKHOl_0EkGawWa1sKsag3pRQ2Xsw",
+      "course_id": "course_btech_cse",
+      "subject_id": "subj_os",
+      "name": "Os",
+      "unit": "Unit 1",
+      "file_type": "pdf",
+      "file_path": "D:\\MY AI\\Personal-Academic-AI-Agent\\documents\\uploads\\1788811360529-991608914-Operating-System.pdf",
+      "processing_status": "completed",
+      "created_at": "2026-09-07T20:02:56.276Z"
     }
   ]
 }
