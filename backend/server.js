@@ -68,8 +68,19 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Root Information Endpoint
-app.get("/", (req, res) => {
+// Production Health Check & Info Endpoints
+app.get("/api/info", (req, res) => {
+  res.json({
+    message: "Personal Academic AI Agent backend is running!",
+    stored_chunks_count: defaultStore.getCount()
+  });
+});
+
+app.get("/", (req, res, next) => {
+  const frontendDistPath = path.join(__dirname, "../frontend/dist/index.html");
+  if (fs.existsSync(frontendDistPath)) {
+    return res.sendFile(frontendDistPath);
+  }
   res.json({
     message: "Personal Academic AI Agent backend is running!",
     stored_chunks_count: defaultStore.getCount()
@@ -720,8 +731,7 @@ if (fs.existsSync(frontendDist)) {
       req.path.startsWith("/api") ||
       req.path.startsWith("/webhook") ||
       req.path.startsWith("/storage") ||
-      req.path === "/health" ||
-      req.path === "/"
+      req.path === "/health"
     ) {
       return next();
     }
