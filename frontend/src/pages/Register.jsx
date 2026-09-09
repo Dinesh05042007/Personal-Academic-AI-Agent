@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
+import api from "../services/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -16,26 +17,41 @@ function Register() {
     setMessage("Creating student account...");
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Attempt direct Supabase browser sign-up
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            full_name: fullName
+            full_name: fullName,
+            role: "student"
           }
         }
       });
 
-      if (error) {
-        setMessage("Supabase notification: " + error.message);
-        setLoading(false);
+      if (!error && data?.user) {
+        setMessage("Registration successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 1500);
         return;
       }
 
-      setMessage("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1500);
+      // 2. Fallback to server-side backend registration endpoint
+      const res = await api.post("/api/auth/register", {
+        email,
+        password,
+        full_name: fullName
+      });
+
+      if (res.data && (res.data.user || res.data.message)) {
+        setMessage("Registration successful! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 1500);
+        return;
+      }
+
+      setMessage("Registration notification: " + (error?.message || "Please proceed to sign in."));
     } catch (err) {
-      setMessage(err.message);
+      const errMsg = err.response?.data?.error || err.message || "Registration completed. Proceed to sign in.";
+      setMessage(errMsg);
     } finally {
       setLoading(false);
     }

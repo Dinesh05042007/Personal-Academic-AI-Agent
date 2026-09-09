@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 class CamberStashService {
-  constructor(apiKey = process.env.CAMBER_API_KEY || "a58ba218d9d8792a960bab5d8a5eeb9c9affdf6f") {
+  constructor(apiKey = process.env.CAMBER_API_KEY || "") {
     this.apiKey = apiKey;
     this.apiBase = "api-v2.cambercloud.com";
   }

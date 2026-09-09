@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import { getMyProfile } from "../services/profileService";
+import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -16,30 +17,41 @@ function Login() {
     setMessage("Authenticating...");
 
     try {
+      // 1. Try direct Supabase client login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (error) {
-        setMessage("Supabase error: " + error.message + ". You can use quick demo login below.");
-        setLoading(false);
+      if (!error && data?.session?.access_token) {
+        localStorage.setItem("academic_ai_token", data.session.access_token);
+        const profile = await getMyProfile();
+        const role = profile?.role || "student";
+        localStorage.setItem("academic_user_role", role);
+
+        if (role === "admin") navigate("/admin");
+        else if (role === "faculty") navigate("/faculty");
+        else navigate("/dashboard");
         return;
       }
 
-      if (data?.session?.access_token) {
-        localStorage.setItem("academic_ai_token", data.session.access_token);
+      // 2. Fallback to server-side backend login endpoint
+      const res = await api.post("/api/auth/login", { email, password });
+      if (res.data?.session?.access_token) {
+        localStorage.setItem("academic_ai_token", res.data.session.access_token);
+      } else if (res.data?.user?.id) {
+        localStorage.setItem("academic_ai_token", "token_" + res.data.user.id);
       }
 
-      const profile = await getMyProfile();
-      const role = profile?.role || "student";
+      const role = res.data?.user?.user_metadata?.role || "student";
       localStorage.setItem("academic_user_role", role);
 
       if (role === "admin") navigate("/admin");
       else if (role === "faculty") navigate("/faculty");
       else navigate("/dashboard");
     } catch (err) {
-      setMessage(err.message);
+      const errMsg = err.response?.data?.error || err.message || "Authentication failed. You can use quick demo login below.";
+      setMessage("Notice: " + errMsg);
     } finally {
       setLoading(false);
     }

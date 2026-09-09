@@ -1,14 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co";
-// Supabase 2026 Key Standard: Publishable key for browser applications, fallback to anon key
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  "https://jtxatrfkxuzeyfhcqlhd.supabase.co";
+
+// Browser-safe Supabase credentials (publishable or anon key only, never secret key)
 const supabaseKey =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  "placeholder-publishable-key";
+  "";
 
-// Safe initialize
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+// Safe initialize browser Supabase client
+export const supabase = createClient(supabaseUrl, supabaseKey || "dummy-anon-key", {
   auth: {
     persistSession: true,
     autoRefreshToken: true

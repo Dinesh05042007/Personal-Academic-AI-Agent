@@ -87,6 +87,73 @@ app.get("/", (req, res, next) => {
   });
 });
 
+// Server-side Student Registration Endpoint
+app.post("/api/auth/register", async (req, res) => {
+  const { email, password, full_name } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required for registration." });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: "Server configuration missing: SUPABASE_URL or SUPABASE_SECRET_KEY" });
+  }
+
+  try {
+    const { createClient } = require("@supabase/supabase-js");
+    const supabaseServer = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await supabaseServer.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: full_name || "Student User", role: "student" }
+      }
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.json({ message: "Registration successful", user: data.user, session: data.session });
+  } catch (err) {
+    res.status(500).json({ error: "Registration error: " + err.message });
+  }
+});
+
+// Server-side Student Login Endpoint
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required." });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: "Server configuration missing: SUPABASE_URL or SUPABASE_SECRET_KEY" });
+  }
+
+  try {
+    const { createClient } = require("@supabase/supabase-js");
+    const supabaseServer = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await supabaseServer.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.json({ message: "Login successful", user: data.user, session: data.session });
+  } catch (err) {
+    res.status(500).json({ error: "Login error: " + err.message });
+  }
+});
+
 // Current user identity endpoint
 app.get("/api/auth/me", requireStudentAuth, (req, res) => {
   res.json({
