@@ -1,5 +1,6 @@
 # Multi-stage production Dockerfile for Personal Academic AI Agent
-FROM node:22-slim AS builder
+# Uses Debian Bookworm Slim for full glibc compatibility with onnxruntime-node
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -11,12 +12,13 @@ COPY frontend/ ./
 RUN npm run build
 
 # Setup Backend Runtime
-FROM node:22-slim AS runner
+FROM node:22-bookworm-slim AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+# Install production backend dependencies
 COPY backend/package*.json ./backend/
 WORKDIR /app/backend
 RUN npm install --omit=dev
