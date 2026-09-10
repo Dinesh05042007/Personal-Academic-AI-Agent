@@ -5,11 +5,13 @@ import CourseCard from "../components/CourseCard";
 import ResourceCard from "../components/ResourceCard";
 import { fetchCourses, fetchSubjects, fetchResources } from "../services/api";
 import { getCurrentUser } from "../services/auth";
+import { fetchStudentProfile } from "../services/profileService";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [studentName, setStudentName] = useState("Dinesh");
+  const [studentName, setStudentName] = useState("Student");
+  const [studentProfile, setStudentProfile] = useState(null);
   const [courses, setCourses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [resources, setResources] = useState([]);
@@ -20,8 +22,16 @@ function Dashboard() {
       try {
         const u = await getCurrentUser();
         setUser(u);
-        const name = u?.user_metadata?.full_name || localStorage.getItem("academic_student_name") || "Dinesh";
+        const name = u?.user_metadata?.full_name || localStorage.getItem("academic_student_name") || "Student";
         setStudentName(name);
+
+        try {
+          const p = await fetchStudentProfile();
+          setStudentProfile(p);
+          if (p.name) setStudentName(p.name);
+        } catch {
+          // Fallback to basic user
+        }
 
         const c = await fetchCourses();
         setCourses(c);
@@ -45,13 +55,58 @@ function Dashboard() {
       <main className="main-content">
         {/* Welcome Header */}
         <section className="dashboard-hero" style={{ marginBottom: "28px" }}>
-          <div>
-            <h2>Welcome back, {studentName} 👋</h2>
-            <p style={{ color: "var(--text-muted)", margin: "4px 0 0" }}>
-              {user?.email || "Student Account"} • Semester 3 B.Tech CSE
-            </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div
+              onClick={() => navigate("/profile")}
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                cursor: "pointer",
+                border: "2px solid var(--primary)",
+                boxShadow: "0 2px 8px rgba(37,99,235,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "var(--primary)",
+                color: "#fff",
+                fontSize: "20px",
+                fontWeight: "bold",
+                flexShrink: 0
+              }}
+              title="Edit Profile"
+            >
+              {studentProfile?.avatar_url ? (
+                <img
+                  src={studentProfile.avatar_url}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+              ) : (
+                (studentName || "ST").slice(0, 2).toUpperCase()
+              )}
+            </div>
+            <div>
+              <h2
+                onClick={() => navigate("/profile")}
+                style={{ cursor: "pointer", display: "inline-block" }}
+                title="Edit Profile"
+              >
+                Welcome back, {studentName} 👋
+              </h2>
+              <p style={{ color: "var(--text-muted)", margin: "4px 0 0" }}>
+                {studentProfile?.department
+                  ? `${studentProfile.department}${studentProfile.year ? ` • ${studentProfile.year}` : ""}`
+                  : (user?.email || "Student Account")}
+              </p>
+            </div>
           </div>
           <div className="hero-buttons">
+            <button className="btn-secondary" onClick={() => navigate("/profile")}>
+              👤 My Profile
+            </button>
             <button className="btn-primary" onClick={() => navigate("/chat")}>
               🤖 Ask AI Tutor
             </button>

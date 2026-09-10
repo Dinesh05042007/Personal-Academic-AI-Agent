@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- MASTER SUPABASE SETUP: Personal Academic AI Agent
 -- Run this in your Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/jtxatrfkxuzeyfhcqlhd/sql/new
@@ -13,6 +13,12 @@ CREATE TABLE IF NOT EXISTS profiles (
     email TEXT,
     name TEXT,
     role TEXT DEFAULT 'student',
+    avatar_url TEXT,
+    bio TEXT,
+    department TEXT,
+    year TEXT,
+    semester INT,
+    register_number TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -118,6 +124,10 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile" ON profiles
+    FOR UPDATE USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Students can view own courses" ON courses;
 CREATE POLICY "Students can view own courses" ON courses

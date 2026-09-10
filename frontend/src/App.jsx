@@ -9,6 +9,7 @@ import Chat from "./pages/Chat";
 import FacultyDashboard from "./pages/FacultyDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AccessDenied from "./pages/AccessDenied";
+import Profile from "./pages/Profile";
 
 function ProtectedRoute({ allowedRoles, children }) {
   const role = localStorage.getItem("academic_user_role") || "student";
@@ -31,6 +32,7 @@ function App() {
         <Route path="/subject/:subjectId" element={<Subject />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/profile" element={<Profile />} />
         <Route
           path="/faculty"
           element={

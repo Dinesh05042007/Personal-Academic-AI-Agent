@@ -60,6 +60,34 @@ const upload = multer({
   }
 });
 
+// Profile photo upload configuration
+const ALLOWED_PHOTO_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+const photoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5 MB max limit
+  },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_PHOTO_EXTENSIONS.includes(ext)) {
+      return cb(new Error(`Unsupported image format '${ext}'. Allowed formats: JPG, JPEG, PNG, WEBP.`));
+    }
+    cb(null, true);
+  }
+});
+
+function getSupabaseAdminClient() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) return null;
+  try {
+    const { createClient } = require("@supabase/supabase-js");
+    return createClient(supabaseUrl, supabaseKey);
+  } catch (e) {
+    return null;
+  }
+}
+
 // Production Health Check Endpoint (Step 687 & 696)
 app.get("/health", (req, res) => {
   res.json({
@@ -194,6 +222,180 @@ app.get("/api/student/resources", requireStudentAuth, (req, res) => {
   const { subject_id } = req.query;
   const resources = defaultAcademicStore.getResources(req.user.student_id, subject_id);
   res.json({ resources });
+});
+
+// --- Student Profile & Photo Endpoints ---
+
+// Get current student's profile
+app.get("/api/student/profile", requireStudentAuth, async (req, res) => {
+  try {
+    const studentId = req.user.student_id || req.user.id;
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", studentId)
+        .maybeSingle();
+
+      if (!error && data) {
+        defaultAcademicStore.updateProfile(studentId, data);
+        return res.json({ profile: data });
+      }
+    }
+
+    const profile = defaultAcademicStore.getProfile(studentId, req.user);
+    res.json({ profile });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch student profile: " + err.message });
+  }
+});
+
+// Update current student's profile
+app.put("/api/student/profile", requireStudentAuth, async (req, res) => {
+  try {
+    const studentId = req.user.student_id || req.user.id;
+    const { name, bio, department, year, semester, register_number } = req.body;
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (bio !== undefined) updates.bio = bio;
+    if (department !== undefined) updates.department = department;
+    if (year !== undefined) updates.year = year;
+    if (semester !== undefined) updates.semester = semester;
+    if (register_number !== undefined) updates.register_number = register_number;
+
+    const supabase = getSupabaseAdminClient();
+    let updatedProfile = null;
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", studentId)
+        .select()
+        .maybeSingle();
+
+      if (!error && data) {
+        updatedProfile = data;
+      }
+    }
+
+    const localUpdated = defaultAcademicStore.updateProfile(studentId, updates);
+    res.json({
+      message: "Profile updated successfully",
+      profile: updatedProfile || localUpdated
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update profile: " + err.message });
+  }
+});
+
+// Upload student profile photo (Supabase Storage with local fallback)
+app.post("/api/student/profile/photo", requireStudentAuth, photoUpload.single("photo"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No photo file uploaded. Please select an image." });
+    }
+
+    const studentId = req.user.student_id || req.user.id;
+    const ext = path.extname(req.file.originalname).toLowerCase() || ".png";
+    const filename = `avatar_${Date.now()}${ext}`;
+    const storagePath = `profiles/${studentId}/${filename}`;
+    let avatarUrl = null;
+
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from("student-profiles")
+          .upload(storagePath, req.file.buffer, {
+            contentType: req.file.mimetype,
+            upsert: true
+          });
+
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from("student-profiles")
+            .getPublicUrl(storagePath);
+          if (publicUrlData && publicUrlData.publicUrl) {
+            avatarUrl = publicUrlData.publicUrl;
+          }
+        } else {
+          console.warn("Supabase storage upload failed, using local storage fallback:", uploadError.message);
+        }
+      } catch (storageErr) {
+        console.warn("Supabase storage exception:", storageErr.message);
+      }
+    }
+
+    // Local storage fallback
+    if (!avatarUrl) {
+      const localProfileDir = path.join(__dirname, "../documents/storage/profiles", studentId);
+      if (!fs.existsSync(localProfileDir)) {
+        fs.mkdirSync(localProfileDir, { recursive: true });
+      }
+      const localFilePath = path.join(localProfileDir, filename);
+      fs.writeFileSync(localFilePath, req.file.buffer);
+      avatarUrl = `/api/storage/profile-photo?file=${encodeURIComponent(filename)}&student_id=${encodeURIComponent(studentId)}`;
+    }
+
+    // Save avatar_url in database & local academic store
+    if (supabase) {
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", studentId);
+    }
+
+    const updatedProfile = defaultAcademicStore.updateProfile(studentId, { avatar_url: avatarUrl });
+    res.json({
+      message: "Profile photo uploaded successfully",
+      avatar_url: avatarUrl,
+      profile: updatedProfile
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to upload photo: " + err.message });
+  }
+});
+
+// Remove student profile photo
+app.delete("/api/student/profile/photo", requireStudentAuth, async (req, res) => {
+  try {
+    const studentId = req.user.student_id || req.user.id;
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", studentId);
+    }
+    const updated = defaultAcademicStore.updateProfile(studentId, { avatar_url: null });
+    res.json({ message: "Profile photo removed successfully", profile: updated });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove photo: " + err.message });
+  }
+});
+
+// Stream profile photo from local storage fallback
+app.get("/api/storage/profile-photo", (req, res) => {
+  try {
+    const studentId = req.query.student_id;
+    const filename = req.query.file;
+    if (!studentId || !filename) {
+      return res.status(400).json({ error: "Missing student_id or file parameter." });
+    }
+    // Prevent directory traversal
+    const safeStudentId = path.basename(studentId);
+    const safeFilename = path.basename(filename);
+    const profileDir = path.join(__dirname, "../documents/storage/profiles", safeStudentId);
+    const filePath = path.join(profileDir, safeFilename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "Profile photo not found." });
+    }
+    res.sendFile(filePath);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to retrieve profile photo: " + err.message });
+  }
 });
 
 // --- Stage 19: Faculty & Admin Institutional Management Endpoints ---
@@ -813,11 +1015,11 @@ if (fs.existsSync(frontendDist)) {
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ error: "File size exceeds the 25MB limit. Please upload a smaller academic document." });
+      return res.status(400).json({ error: "File size exceeds the allowed limit (max 5MB for profile photos, 25MB for course materials)." });
     }
     return res.status(400).json({ error: "File upload error: " + err.message });
   }
-  if (err.message && err.message.includes("Unsupported file format")) {
+  if (err.message && (err.message.includes("Unsupported file format") || err.message.includes("Unsupported image format"))) {
     return res.status(400).json({ error: err.message });
   }
   console.error("Internal Server Error:", err.message);

@@ -10,6 +10,7 @@ class AcademicStore {
     this.courses = [];
     this.subjects = [];
     this.resources = [];
+    this.profiles = {};
     this.load();
     this.seedDefaultsIfEmpty();
   }
@@ -21,6 +22,7 @@ class AcademicStore {
         this.courses = data.courses || [];
         this.subjects = data.subjects || [];
         this.resources = data.resources || [];
+        this.profiles = data.profiles || {};
       }
     } catch (err) {
       console.warn("Could not load academic metadata:", err.message);
@@ -37,7 +39,8 @@ class AcademicStore {
           {
             courses: this.courses,
             subjects: this.subjects,
-            resources: this.resources
+            resources: this.resources,
+            profiles: this.profiles
           },
           null,
           2
@@ -262,6 +265,43 @@ class AcademicStore {
         { id: "admin_dean_uuid", name: "Dean Academic", email: "admin@university.edu", role: "admin", status: "active" }
       ];
     }
+  }
+
+  getProfile(studentId, defaultUser = null) {
+    if (!this.profiles) this.profiles = {};
+    if (!this.profiles[studentId]) {
+      const defaultName = defaultUser?.name || defaultUser?.user_metadata?.full_name || "Student";
+      const defaultEmail = defaultUser?.email || "";
+      this.profiles[studentId] = {
+        id: studentId,
+        student_id: studentId,
+        name: defaultName,
+        email: defaultEmail,
+        role: defaultUser?.role || defaultUser?.user_metadata?.role || "student",
+        department: "",
+        year: "",
+        semester: null,
+        register_number: "",
+        bio: "",
+        avatar_url: null,
+        created_at: new Date().toISOString()
+      };
+      this.save();
+    }
+    return this.profiles[studentId];
+  }
+
+  updateProfile(studentId, updates = {}) {
+    const profile = this.getProfile(studentId);
+    const allowed = ["name", "bio", "department", "year", "semester", "register_number", "avatar_url"];
+    for (const key of allowed) {
+      if (updates[key] !== undefined) {
+        profile[key] = updates[key];
+      }
+    }
+    this.profiles[studentId] = profile;
+    this.save();
+    return profile;
   }
 }
 
