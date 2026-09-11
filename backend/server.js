@@ -12,6 +12,7 @@ const { defaultAgentOrchestrator } = require("./src/agentOrchestrator");
 const { requireStudentAuth, requireRole, verifyStudentResourceOwnership } = require("./src/authMiddleware");
 const { defaultAcademicStore } = require("./src/academicStore");
 const { defaultStorageService } = require("./src/storageService");
+const { warmUpEmbeddingModel } = require("./src/embeddings");
 
 const app = express();
 
@@ -101,6 +102,18 @@ app.get("/api/info", (req, res) => {
   res.json({
     message: "Personal Academic AI Agent backend is running!",
     stored_chunks_count: defaultStore.getCount()
+  });
+});
+
+// Model readiness endpoint — shows whether ONNX warm-up has completed
+app.get("/api/readiness", (req, res) => {
+  const { isModelReady } = require("./src/embeddings");
+  const ready = isModelReady();
+  res.status(ready ? 200 : 503).json({
+    model_ready: ready,
+    message: ready
+      ? "Embedding model is loaded and ready for uploads."
+      : "Embedding model is still warming up. Uploads may be slower on this first request."
   });
 });
 
@@ -459,8 +472,21 @@ app.get("/api/admin/users", requireStudentAuth, requireRole(["admin"]), (req, re
 /**
  * Endpoint: POST /api/resources/ingest
  * Protected with strict tenant auth.
+ * Hard 120-second timeout: Render free-tier can be slow on first ONNX use.
  */
 app.post("/api/resources/ingest", requireStudentAuth, upload.single("file"), async (req, res) => {
+  const reqStart = Date.now();
+  let timeoutHandle;
+
+  // Hard request timeout — avoids indefinite hang visible to the student
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error(
+        "Ingestion timed out after 120 seconds. The AI model may still be loading on the server — please retry in 30 seconds."
+      ));
+    }, 120_000);
+  });
+
   try {
     const student_id = req.user.student_id;
     const { course_id, subject_id, unit, resource_name, text_content } = req.body;
@@ -473,22 +499,31 @@ app.post("/api/resources/ingest", requireStudentAuth, upload.single("file"), asy
       inputSource = req.file.path;
       mimeType = req.file.mimetype;
       actualResourceName = resource_name || req.file.originalname;
+      const fileSizeKB = Math.round(req.file.size / 1024);
+      console.log(`[UPLOAD] File received: "${actualResourceName}" (${fileSizeKB} KB, ${mimeType}), student_id=${student_id}`);
     } else if (text_content) {
       inputSource = text_content;
       mimeType = "text/plain";
       actualResourceName = resource_name || "Text_Notes.txt";
+      console.log(`[UPLOAD] Text content received: ${text_content.length} chars, student_id=${student_id}`);
     } else {
       return res.status(400).json({ error: "Either a file or text_content must be provided" });
     }
 
-    const result = await defaultRAGService.ingestDocument(inputSource, {
-      student_id,
-      course_id,
-      subject_id,
-      unit,
-      resource_name: actualResourceName,
-      mimeType
-    });
+    const result = await Promise.race([
+      defaultRAGService.ingestDocument(inputSource, {
+        student_id,
+        course_id,
+        subject_id,
+        unit,
+        resource_name: actualResourceName,
+        mimeType
+      }),
+      timeoutPromise
+    ]);
+
+    clearTimeout(timeoutHandle);
+    console.log(`[UPLOAD] Ingest complete in ${Date.now() - reqStart}ms, chunks=${result.chunks_count}`);
 
     // Also register in academic store
     const savedResource = defaultAcademicStore.addResource(student_id, {
@@ -507,7 +542,8 @@ app.post("/api/resources/ingest", requireStudentAuth, upload.single("file"), asy
       ...result
     });
   } catch (err) {
-    console.error("Ingestion error:", err);
+    clearTimeout(timeoutHandle);
+    console.error(`[UPLOAD] Ingestion error after ${Date.now() - reqStart}ms:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -1034,8 +1070,11 @@ const PORT = process.env.PORT || 3000;
 if (require.main === module) {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Backend server running on http://0.0.0.0:${PORT}`);
+    // Pre-warm ONNX embedding model immediately after server binds.
+    // This downloads model_quantized.onnx (~22MB) from HuggingFace at boot time
+    // so the first student upload does NOT trigger a slow model download.
+    warmUpEmbeddingModel();
   });
 }
 
 module.exports = app;
-

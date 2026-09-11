@@ -28,10 +28,18 @@ class RAGService {
       throw new Error("student_id is required to ingest document");
     }
 
+    const ingestStart = Date.now();
+    console.log(`[INGEST] ▶ Start — student_id=${student_id}, resource="${resource_name}", mimeType=${mimeType}`);
+
     // 1. Extract & clean text
+    console.log("[INGEST] Stage 1: PDF/text extraction...");
+    const t1 = Date.now();
     const pages = await extractDocument(inputSource, mimeType);
+    console.log(`[INGEST] Stage 1 done: ${pages.length} pages extracted in ${Date.now() - t1}ms`);
 
     // 2. Split into overlapping chunks with metadata
+    console.log("[INGEST] Stage 2: Chunking pages...");
+    const t2 = Date.now();
     const rawChunks = chunkDocumentPages(pages, {
       student_id,
       course_id,
@@ -40,12 +48,26 @@ class RAGService {
       resource_name,
       unit
     });
+    console.log(`[INGEST] Stage 2 done: ${rawChunks.length} chunks in ${Date.now() - t2}ms`);
+
+    if (rawChunks.length === 0) {
+      console.warn("[INGEST] ⚠ No chunks generated — document may be empty or image-only PDF");
+      return { success: true, student_id, resource_name, chunks_count: 0, pages_count: pages.length };
+    }
 
     // 3. Generate dense vector embeddings for each chunk
+    console.log(`[INGEST] Stage 3: Generating embeddings for ${rawChunks.length} chunks...`);
+    const t3 = Date.now();
     const embeddedChunks = await generateBatchEmbeddings(rawChunks);
+    console.log(`[INGEST] Stage 3 done: ${embeddedChunks.length} embeddings in ${Date.now() - t3}ms`);
 
     // 4. Store in vector database
+    console.log("[INGEST] Stage 4: Storing in vector database...");
+    const t4 = Date.now();
     this.vectorStore.addChunks(embeddedChunks);
+    console.log(`[INGEST] Stage 4 done: stored in ${Date.now() - t4}ms`);
+
+    console.log(`[INGEST] ✅ Complete — ${embeddedChunks.length} chunks, ${pages.length} pages, total ${Date.now() - ingestStart}ms`);
 
     return {
       success: true,
@@ -55,6 +77,7 @@ class RAGService {
       pages_count: pages.length
     };
   }
+
 
   /**
    * Query the student knowledge base with semantic similarity and strict filtering
