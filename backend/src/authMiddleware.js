@@ -45,11 +45,19 @@ async function requireStudentAuth(req, res, next) {
     const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
     if (process.env.SUPABASE_URL && supabaseKey) {
       try {
+        let hostName = "unknown";
+        try { hostName = new URL(process.env.SUPABASE_URL).hostname; } catch (e) {}
+        console.log(`[AUTH] Verifying token (len=${token?.length || 0}) against Supabase host="${hostName}", key_configured=${process.env.SUPABASE_SECRET_KEY ? "SUPABASE_SECRET_KEY" : "SUPABASE_ANON_KEY"}`);
+
         const { createClient } = require("@supabase/supabase-js");
         const supabase = createClient(process.env.SUPABASE_URL, supabaseKey);
         const { data: { user }, error } = await supabase.auth.getUser(token);
         if (error || !user) {
-          return res.status(401).json({ error: "Invalid or expired session token" });
+          console.error(`[AUTH ERROR] Supabase auth.getUser failed: status=${error?.status || 401}, code=${error?.code || "none"}, message="${error?.message || "User object null"}"`);
+          return res.status(401).json({
+            error: "Invalid or expired session token",
+            supabase_error: error?.message || "No user returned for token"
+          });
         }
         req.user = {
           id: user.id,
@@ -58,6 +66,7 @@ async function requireStudentAuth(req, res, next) {
           role: user.user_metadata?.role || "student"
         };
       } catch (err) {
+        console.error(`[AUTH ERROR] Exception during auth verification: ${err.message}`);
         return res.status(401).json({ error: "Auth verification failed: " + err.message });
       }
     } else {
