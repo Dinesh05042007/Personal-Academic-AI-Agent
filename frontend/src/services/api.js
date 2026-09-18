@@ -8,10 +8,14 @@ const api = axios.create({
   baseURL: API_BASE,
 });
 
-// Automatically inject Bearer authentication token
+// Automatically attach the real Bearer token issued at login.
+// SECURITY: never fabricate a fallback identity here — without a token the
+// backend must (and will) reject the request with HTTP 401.
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("academic_ai_token") || "token_student_A";
-  config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem("academic_ai_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -20,10 +24,8 @@ export async function fetchCurrentUser() {
     const res = await api.get("/api/auth/me");
     return res.data;
   } catch {
-    return {
-      authenticated: true,
-      user: { id: "student_001", student_id: "student_001", email: "dinesh@academic.edu", name: "Dinesh" }
-    };
+    // SECURITY: never fabricate an authenticated identity on failure.
+    return { authenticated: false, user: null };
   }
 }
 

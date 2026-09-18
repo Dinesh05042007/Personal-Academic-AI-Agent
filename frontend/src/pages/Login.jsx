@@ -39,9 +39,9 @@ function Login() {
       const res = await api.post("/api/auth/login", { email, password });
       if (res.data?.session?.access_token) {
         localStorage.setItem("academic_ai_token", res.data.session.access_token);
-      } else if (res.data?.user?.id) {
-        localStorage.setItem("academic_ai_token", "token_" + res.data.user.id);
       }
+      // SECURITY: never store a fabricated "token_<id>" string — the backend
+      // rejects unregistered tokens with HTTP 401.
 
       const role = res.data?.user?.user_metadata?.role || "student";
       localStorage.setItem("academic_user_role", role);

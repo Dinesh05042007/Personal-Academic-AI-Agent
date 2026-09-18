@@ -72,13 +72,22 @@ async function runStage19Tests() {
 
     // --- TEST 2: Registration Self-Grant Prevention ---
     console.log("--- TEST 2: Role Self-Selection Prevention ---");
-    // Any unauthenticated/default session defaults strictly to student role
-    const unauthedRes = await axios.get(`http://localhost:${port}/api/auth/me`);
-    if (unauthedRes.data.user?.role === "student") {
-      console.log("   Unauthenticated fallback role:", unauthedRes.data.user.role);
-      console.log("✅ TEST 2 PASSED: Default role is strictly 'student'; client cannot self-grant admin.\n");
+    // SECURITY: Unauthenticated requests must fail closed with HTTP 401.
+    // No default identity or role is ever created from a missing token, so a
+    // client can never self-select (or inherit) any role without authenticating.
+    let selfGrantBlocked = false;
+    try {
+      await axios.get(`http://localhost:${port}/api/auth/me`);
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        selfGrantBlocked = true;
+      }
+    }
+    if (selfGrantBlocked) {
+      console.log("   Unauthenticated /api/auth/me rejected with HTTP 401 — no default role issued.");
+      console.log("✅ TEST 2 PASSED: Client cannot self-grant any role; unauthenticated requests fail closed.\n");
     } else {
-      throw new Error("TEST 2 FAILED: Non-student default role detected");
+      throw new Error("TEST 2 FAILED: Unauthenticated /api/auth/me did not fail closed with HTTP 401");
     }
 
     // --- TEST 3: Role Middleware (Student Blocked from /api/admin/stats) ---
