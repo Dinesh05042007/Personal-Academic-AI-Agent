@@ -75,20 +75,16 @@ async function runStage21MatrixTests() {
     // -------------------------------------------------------------------------
     // TC-03: User Logout / Missing Token
     // -------------------------------------------------------------------------
-    process.env.STRICT_AUTH = "true";
+    // NOTE: Auth is always strict now (fail-closed via authMiddleware); no STRICT_AUTH flag exists.
     let unauthStatus = null;
-    try {
-      const logoutRes = await makeRequest(server, {
-        hostname: "localhost",
-        port,
-        path: "/api/student/courses",
-        method: "GET"
-        // Missing Authorization header
-      });
-      unauthStatus = logoutRes.status;
-    } finally {
-      delete process.env.STRICT_AUTH;
-    }
+    const logoutRes = await makeRequest(server, {
+      hostname: "localhost",
+      port,
+      path: "/api/student/courses",
+      method: "GET"
+      // Missing Authorization header
+    });
+    unauthStatus = logoutRes.status;
     assert.strictEqual(unauthStatus, 401, "TC-03: Unauthenticated request must return 401");
     console.log("✅ TC-03 PASSED: User Logout (Unauthenticated access strictly returns 401).");
 

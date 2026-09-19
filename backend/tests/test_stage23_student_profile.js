@@ -143,7 +143,9 @@ async function runStudentProfileTests() {
         hostname: "localhost",
         port,
         path: uploadedAvatarUrl,
-        method: "GET"
+        method: "GET",
+        // The stream route is authenticated (strict auth); identity comes from the token.
+        headers: { Authorization: "Bearer token_profile_student_A" }
       });
       assert.strictEqual(streamRes.status, 200, "GET /api/storage/profile-photo must return HTTP 200");
       assert.ok(streamRes.buffer.length > 0, "Retrieved image buffer must not be empty");

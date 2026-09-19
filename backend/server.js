@@ -389,12 +389,15 @@ app.delete("/api/student/profile/photo", requireStudentAuth, async (req, res) =>
 });
 
 // Stream profile photo from local storage fallback
-app.get("/api/storage/profile-photo", (req, res) => {
+// SECURITY: authenticated like every other data-bearing route. The identity comes
+// exclusively from the Bearer token; a legacy ?student_id= param is tolerated only
+// because requireStudentAuth already rejects (403) any param that mismatches it.
+app.get("/api/storage/profile-photo", requireStudentAuth, (req, res) => {
   try {
-    const studentId = req.query.student_id;
+    const studentId = req.user.student_id;
     const filename = req.query.file;
-    if (!studentId || !filename) {
-      return res.status(400).json({ error: "Missing student_id or file parameter." });
+    if (!filename) {
+      return res.status(400).json({ error: "Missing file parameter." });
     }
     // Prevent directory traversal
     const safeStudentId = path.basename(studentId);

@@ -10,16 +10,18 @@
  *  6.  Missing token + spoofed student_id -> 401 (never an auto-created identity)
  *  7.  Authenticated Student A + spoofed Student B id -> 403
  *  8.  Dev-token request cannot mutate the stored token object
- *  9.  "student_A_uuid_evil" must not match owner "student_A_uuid"
- *  10. Student A cannot access Student B's profile/resources
- *  11. Student B cannot modify Student A's profile/photo/resources
- *  12. Production mode: dev tokens disabled, everything unauthorized -> 401
+ *  9.  "student_A_uuid_evil" must not match owner "student_A_uuid" * 10. Student A cannot access Student B's profile/resources
+ * 11. Student B cannot modify Student A's profile/photo/resources
+ * 12. Production mode: dev tokens disabled, everything unauthorized -> 401
+ * 13. Profile-photo stream route is authenticated and tenant-isolated
+ *     (review regression: /api/storage/profile-photo sits behind requireStudentAuth)
  */
 
 const assert = require("assert");
 const http = require("http");
 const { spawnSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 const app = require("../server");
 const {
   registerDevToken,
@@ -311,6 +313,64 @@ async function runStage24Tests() {
     assert.strictEqual(profileAAgain.body.profile.name, profileA.body.profile.name, "Student A's profile name must be unchanged after B's activity");
     assert.strictEqual(profileAAgain.body.profile.student_id, studentA, "Student A must still receive only their own profile");
     console.log("✅ CASE 11 PASSED: Student B cannot modify Student A's profile, photo, or resources.");
+
+    // -------------------------------------------------------------------------
+    // CASE 13: Profile-photo stream route is authenticated and tenant-isolated
+    // (regression for the review fix: GET /api/storage/profile-photo now sits
+    // behind requireStudentAuth and derives identity from the token only)
+    // -------------------------------------------------------------------------
+    const photoDir = path.join(__dirname, "..", "..", "documents", "storage", "profiles", studentA);
+    fs.mkdirSync(photoDir, { recursive: true });
+    const photoName = "stage24_avatar_A.png";
+    fs.writeFileSync(path.join(photoDir, photoName), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+
+    // No token -> 401 (previously this route streamed anyone's photo)
+    const anonPhotoRes = await makeRequest(server, {
+      ...base,
+      path: `/api/storage/profile-photo?file=${photoName}`,
+      method: "GET"
+    });
+    assert.strictEqual(anonPhotoRes.status, 401, "Profile-photo stream without a token must return 401");
+
+    // Owner streams their own photo with the token alone (no student_id param) -> 200
+    const ownerPhotoRes = await makeRequest(server, {
+      ...base,
+      path: `/api/storage/profile-photo?file=${photoName}`,
+      method: "GET",
+      headers: { Authorization: "Bearer token_stage24_A" }
+    });
+    assert.strictEqual(ownerPhotoRes.status, 200, "Owner must be able to stream their own photo with the token alone");
+    assert.ok(String(ownerPhotoRes.headers["content-type"] || "").includes("image/png"), "Streamed photo must have an image content type");
+
+    // A different student's token must not stream Student A's photo
+    const crossPhotoStreamRes = await makeRequest(server, {
+      ...base,
+      path: `/api/storage/profile-photo?file=${photoName}`,
+      method: "GET",
+      headers: { Authorization: "Bearer token_stage24_B" }
+    });
+    assert.strictEqual(crossPhotoStreamRes.status, 404, "Student B must not stream Student A's photo");
+
+    // Spoofed ?student_id= conflicting with the token -> 403 (middleware tenant check)
+    const spoofPhotoRes = await makeRequest(server, {
+      ...base,
+      path: `/api/storage/profile-photo?file=${photoName}&student_id=${studentB}`,
+      method: "GET",
+      headers: { Authorization: "Bearer token_stage24_A" }
+    });
+    assert.strictEqual(spoofPhotoRes.status, 403, "Spoofed student_id conflicting with the token must be rejected with 403");
+
+    // Legacy URL with a MATCHING student_id param keeps working (backward compatibility)
+    const legacyPhotoRes = await makeRequest(server, {
+      ...base,
+      path: `/api/storage/profile-photo?file=${photoName}&student_id=${studentA}`,
+      method: "GET",
+      headers: { Authorization: "Bearer token_stage24_A" }
+    });
+    assert.strictEqual(legacyPhotoRes.status, 200, "Legacy URL with matching student_id param must keep working");
+
+    fs.rmSync(path.join(photoDir, photoName), { force: true });
+    console.log("✅ CASE 13 PASSED: Profile-photo stream is authenticated and tenant-isolated.");
 
     // -------------------------------------------------------------------------
     // CASE 12: Production mode — dev tokens disabled, fail-closed 401s

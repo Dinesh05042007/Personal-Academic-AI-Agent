@@ -215,7 +215,7 @@ async function runStage14SecurityHardeningTests() {
   // TEST 7: Unauthenticated API request is rejected (Step 530 Test 7)
   // =========================================================================
   console.log("--- TEST 7: Unauthenticated API request is rejected ---");
-  process.env.STRICT_AUTH = "true";
+  // NOTE: Auth is always strict now (fail-closed via authMiddleware); no STRICT_AUTH flag exists.
   try {
     await axios.post(`${baseUrl}/api/chat`, {
       question: "What is dual-mode operation?"
@@ -228,8 +228,6 @@ async function runStage14SecurityHardeningTests() {
     } else {
       throw new Error(`❌ TEST 7 FAILED: Expected 401, got ${err.message}`);
     }
-  } finally {
-    delete process.env.STRICT_AUTH;
   }
 
   // =========================================================================
