@@ -6,12 +6,15 @@ import ResourceCard from "../components/ResourceCard";
 import { fetchCourses, fetchSubjects, fetchResources } from "../services/api";
 import { getCurrentUser } from "../services/auth";
 import { fetchStudentProfile } from "../services/profileService";
+import useAuthedMedia from "../hooks/useAuthedMedia";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [studentName, setStudentName] = useState("Student");
   const [studentProfile, setStudentProfile] = useState(null);
+  // <img> requests cannot send Authorization headers; authed media loads as a blob URL.
+  const avatarSrc = useAuthedMedia(studentProfile?.avatar_url || null);
   const [courses, setCourses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [resources, setResources] = useState([]);
@@ -79,7 +82,7 @@ function Dashboard() {
             >
               {studentProfile?.avatar_url ? (
                 <img
-                  src={studentProfile.avatar_url}
+                  src={avatarSrc}
                   alt="Profile"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   onError={(e) => { e.target.style.display = "none"; }}

@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import { fetchStudentProfile } from "../services/profileService";
+import useAuthedMedia from "../hooks/useAuthedMedia";
 
 function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [role, setRole] = useState(localStorage.getItem("academic_user_role") || "student");
   const [userProfile, setUserProfile] = useState(null);
+  // <img> requests cannot send Authorization headers; authed media loads as a blob URL.
+  const avatarSrc = useAuthedMedia(userProfile?.avatar_url || null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -143,7 +146,7 @@ function Sidebar() {
         >
           {userProfile?.avatar_url ? (
             <img
-              src={userProfile.avatar_url}
+              src={avatarSrc}
               alt="Avatar"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               onError={(e) => {

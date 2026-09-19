@@ -7,6 +7,7 @@ import {
   uploadProfilePhoto,
   deleteProfilePhoto
 } from "../services/profileService";
+import useAuthedMedia from "../hooks/useAuthedMedia";
 
 function Profile() {
   const navigate = useNavigate();
@@ -183,7 +184,9 @@ function Profile() {
       .toUpperCase();
   };
 
-  const displayAvatar = previewUrl || profile.avatar_url;
+  // <img> requests cannot send Authorization headers; authed media loads as a blob URL.
+  // previewUrl is already a local blob/data URL and passes through the hook untouched.
+  const displayAvatar = useAuthedMedia(previewUrl || profile.avatar_url || null);
 
   return (
     <div className="app-layout">
